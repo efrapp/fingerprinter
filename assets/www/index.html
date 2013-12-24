@@ -1,10 +1,147 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
 	<head>
-		<title>PhoneGap</title>
+		<meta http-equiv="Content-type" content="text/html;
+			charset=utf-8" >
+		<meta name="viewport" id="viewport" 
+			content="width=device-width, height=device-height,
+			initial-scale=1.0, maximun-scale=1.0;" />
+		
+		<link rel="stylesheet" href="jquery.mobile1.0b3.min.css" />
+		<link rel="stylesheet" href="main.css" />
+		
+    	<script type="text/javascript" charset="utf-8" src="jquery1.6.4.min.js"></script>
+    	<script type="text/javascript" charset="utf-8" src="jquery.mobile1.0b3.min.js"></script>
 		<script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+		<script type="text/javascript" charset="utf-8" src="main.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			
+			$(document).ready(function(){
+				
+				$("#login").hide();
+			});
+		
+			function onBodyLoad(){
+				document.addEventListener("deviceready", onDeviceReady, false);			
+			}
+			
+			function onDeviceReady(){
+				
+				init();
+				
+				verifyUser();
+				
+				$('form').submit(function(){
+					
+					var postData = $(this).serialize();
+
+					$.ajax({
+						type: "POST",
+						//data: "name="+name+"&lastName="+lastname+"&email="+email,
+						data: postData,
+						dataType: 'html',
+						url: "http://192.168.0.68/fingerprinter/fingerprinter-server.php",
+						success: function(data){
+							//console.log(data);
+							saveRecord();
+							alert('The user was successfully added.');
+							$.mobile.changePage("#main", "slide", false, true);
+						},
+						error: function(XMLHttpRequest, data, errorThrown){
+							//console.log(data);
+							alert('There was an error adding the user.');
+						}
+					});
+					
+					return false;
+				});	
+			}
+		
+		</script>
 	</head>
-	<body>
-		<h1>Hello PhoneGap</h1>
+	
+	<body onload="onBodyLoad()">
+		<section id="login" data-role="page" >
+	      <header data-role="header">
+	        <h1>Finger Printer - Login </h1>
+	      </header>
+	      <div data-role="content">
+	      	<form>
+	      		<label for="name">Nombre:</label>
+		        <input type="text" name="name" id="name" value="" />
+		        <br />
+		        <label for="lastName">Apellido:</label>
+		        <input type="text" name="lastName" id="lastName" value="" />
+		        <br />
+		        <label for="ssn">Cedula:</label>
+		        <input type="number" name="ssn" id="ssn" value="" />
+		        <br />
+		        <label for="email">E-mail:</label>
+		        <input type="email" name="email" id="email" value="" />
+		        <br />
+		        <input type="submit" value="Save">
+	      	</form>
+	      </div>
+    	</section>
+    	<section id="main" data-role="page">
+    		<header data-role="header">
+		        <a onclick="showRecordPage();" data-icon="grid" >Record</a>
+		        <h1>Finger Printer </h1>
+		        <a onclick="showConfigPage();" data-icon="gear" >Config</a>
+		      </header>
+		      <div data-role="content">
+		      	<p>Entrada</p>
+		      	<a id="green_fingerprint" onclick="fingerPrintIn()"><img src="images/huella_verde.png"></a>
+		      	<p>Salida</p>
+		      	<a id="red_fingerprint" onclick="fingerPrintOut()"><img src="images/huella_rojo.png"></a>
+		      </div>
+    	</section>
+    	<section id="config" data-role="page" data-add-back-btn="true">
+    		<header data-role="header">
+    			<h1> Configuration </h1>
+    		</header>
+    		<div data-role="content">
+    			<!-- <input type="button" value="Delete Record" onclick="deleteRecord();" />  -->
+    			<div data-role="collapsible" data-collapsed="true">
+    				<h3> Eliminar Registros </h3>
+    				<div>
+    					<label for="monthList">Seleccione el Mes: </label>
+          				<select id="monthList" name="monthList">
+          					<option value="01">Enero</option>
+          					<option value="02">Febrero</option>
+          					<option value="03">Marzo</option>
+          					<option value="04">Abril</option>
+          					<option value="05">Mayo</option>
+          					<option value="06">Junio</option>
+          					<option value="07">Julio</option>
+          					<option value="08">Agosto</option>
+          					<option value="09">Septiembre</option>
+          					<option value="10">Octubre</option>
+          					<option value="11">Noviembre</option>
+          					<option value="12">Diciembre</option>
+          				</select>
+          				<input type="button" value="Eliminar" onclick="confDeleteRecords();" />
+    				</div>
+    			</div>
+    		</div>
+    	</section>
+    	<section id="record" data-role="page" data-add-back-btn="true">
+    		<header data-role="header">
+    			<h1>Registro de huellas</h1>
+    		</header>
+    		<div data-role="content">
+    			<table data-role="table" id="records-table" data-mode="reflow">
+				  <thead>
+				    <tr>
+				      <th>Estado</th>
+				      <th>Fecha</th>
+				    </tr>
+				  </thead>
+				  <tbody>
+				    
+				  </tbody>
+				</table>
+    		</div>
+    	</section>
 	</body>
 </html>

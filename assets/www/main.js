@@ -112,7 +112,7 @@
 	  var month = addZ(date.getMonth() + 1);
 	  var day = addZ(date.getDate());
 	  var inDate = date.getFullYear()+"-"+month+"-"+day+" "+date.getHours()+":"+date.getMinutes()+":"+date.getSeconds();
-	  alert(inDate);
+	  //alert(inDate);
 	  var sqlStr = 'INSERT INTO records (type, date) VALUES (?, ?)';
 	  console.log(sqlStr);
 	  tx.executeSql(sqlStr, [type, inDate], onSqlSuccess, onSqlError);
@@ -128,7 +128,7 @@
 	  var month = addZ(date.getMonth() + 1);
 	  var day = addZ(date.getDate());
 	  var outDate = date.getFullYear()+"-"+month+"-"+day+" "+date.getHours()+":"+date.getMinutes()+":"+date.getSeconds();
-	  alert(outDate);
+	  //alert(outDate);
 	  var sqlStr = 'INSERT INTO records (type, date) VALUES (?, ?)';
 	  console.log(sqlStr);
 	  tx.executeSql(sqlStr, [type, outDate], onSqlSuccess, onSqlError);
@@ -241,7 +241,7 @@
 	}
 	
 	function showRecords(){
-		var sqlStr = "SELECT * FROM records ORDER BY date DESC";
+		var sqlStr = "SELECT * FROM records ORDER BY date ASC";
 		
 		console.log("SQL: " + sqlStr);
 		
@@ -257,6 +257,9 @@
 						var len = results.rows.length;
 						var objDate;
 						var strDate;
+						var inOutCount = 0;
+						var inOutDateArray = new Array();
+						var ttalWorkedHrs = 0;
 				
 						for(var i = 0; i < len; i++){
 							
@@ -264,9 +267,38 @@
 							strDate = results.rows.item(i).date;
 							//d.setTime(results.rows.item(i).date);
 							
-							$('#records-table > tbody:last').append('<tr><td>'+results.rows.item(i).type+'</td><td>'+strDate+'</td></tr>');
+							$("<tr id= 'record"+ i +"'><td>"+results.rows.item(i).type+"</td><td>"+strDate+"</td><td></td></tr>").prependTo('#records-table > tbody');
+							$('t')
 							//objDate = new Date(strDate);
+							
+							inOutDateArray[inOutCount] = strDate;
+							
+							if( i % 2 != 0){
+								
+								var inDate = new Date(inOutDateArray[0]);
+								var outDate = new Date(inOutDateArray[1]);
+								
+								var diffSec = Math.abs(outDate - inDate) / 1000;
+								var workedHrs = ((diffSec % 31536000) % 86400) / 3600;
+								
+								ttalWorkedHrs = ttalWorkedHrs + workedHrs;
+								
+								workedHrs = workedHrs.toFixed(4);
+								
+								//alert("in: "+ inDate + " out: "+ outDate + " worked hours: "+ workedHrs);
+								
+								$('#record' + i + ' td:last').text(workedHrs);
+								
+								inOutCount = 0;
+							}else{
+								
+								inOutCount++;	
+							}
+							
 						}
+						
+						$('#worked-hrs-table tr td:last').text(ttalWorkedHrs.toFixed(4));
+						
 						//alert("Dia: "+objDate.getDay());
 						//alert("Type: "+results.rows.item(0).type+" Date: "+results.rows.item(0).date)
 					},

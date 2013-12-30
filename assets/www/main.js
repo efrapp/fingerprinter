@@ -107,15 +107,35 @@
 	
 	  console.log("Entering insertInDateFingerprint");
 	  
-	  var type= "entrada";
-	  var date = new Date();
-	  var month = addZ(date.getMonth() + 1);
-	  var day = addZ(date.getDate());
-	  var inDate = date.getFullYear()+"-"+month+"-"+day+" "+date.getHours()+":"+date.getMinutes()+":"+date.getSeconds();
-	  //alert(inDate);
-	  var sqlStr = 'INSERT INTO records (type, date) VALUES (?, ?)';
-	  console.log(sqlStr);
-	  tx.executeSql(sqlStr, [type, inDate], onSqlSuccess, onSqlError);
+	  var lastRegisterQuery = 'SELECT type FROM records ORDER BY date DESC LIMIT 1';
+	  
+	  tx.executeSql(lastRegisterQuery, [], 
+	  	
+	  	function(tx, success){
+	  		
+	  		if(success.rows.item(0).type == 'salida'){
+	  			// Ejecutar consulta para agregar registro de entrada
+  			   
+			  var type= "entrada";
+			  var date = new Date();
+			  var month = addZ(date.getMonth() + 1);
+			  var day = addZ(date.getDate());
+			  var inDate = date.getFullYear()+"-"+month+"-"+day+" "+date.getHours()+":"+date.getMinutes()+":"+date.getSeconds();
+			  //alert(inDate);
+			  var sqlStr = 'INSERT INTO records (type, date) VALUES (?, ?)';
+			  
+			  console.log(sqlStr);
+  			  tx.executeSql(sqlStr, [type, inDate], onSqlSuccess, onSqlError);
+	  			
+	  		  alert("Ingreso registrado.");
+	  		  
+	  		}else{
+	  		  alert("Ya registró; una entrada, por favor registre su salida.");
+	  		}
+	  		
+	  	},
+	  	onSqlError
+	  );
 
 	}
 	
@@ -123,16 +143,35 @@
 		
 	  console.log("Entering insertOutDateFingerprint");
 	  
-	  var type= "salida";
-	  var date = new Date();
-	  var month = addZ(date.getMonth() + 1);
-	  var day = addZ(date.getDate());
-	  var outDate = date.getFullYear()+"-"+month+"-"+day+" "+date.getHours()+":"+date.getMinutes()+":"+date.getSeconds();
-	  //alert(outDate);
-	  var sqlStr = 'INSERT INTO records (type, date) VALUES (?, ?)';
-	  console.log(sqlStr);
-	  tx.executeSql(sqlStr, [type, outDate], onSqlSuccess, onSqlError);
-
+	  var lastRegisterQuery = 'SELECT type FROM records ORDER BY date DESC LIMIT 1';
+	  
+	  tx.executeSql(lastRegisterQuery, [], 
+	  	
+	  	function(tx, success){
+	  	
+	  		if(success.rows.item(0).type == 'entrada'){
+	  			
+	  			var type= "salida";
+			    var date = new Date();
+			    var month = addZ(date.getMonth() + 1);
+			    var day = addZ(date.getDate());
+			    var outDate = date.getFullYear()+"-"+month+"-"+day+" "+date.getHours()+":"+date.getMinutes()+":"+date.getSeconds();
+			    //alert(outDate);
+			    var sqlStr = 'INSERT INTO records (type, date) VALUES (?, ?)';
+			    
+			    console.log(sqlStr);
+			    tx.executeSql(sqlStr, [type, outDate], onSqlSuccess, onSqlError);
+			    
+			    alert("Salida registrada.");
+	  			
+	  		}else{
+	  			
+	  			alert("Ya registró; una salida, por favor registre su entrada.");
+	  		}
+	  	
+	  	}, 
+	  	onSqlError
+  	  );
 	}
 	
 	function deleteRecord(){
@@ -228,7 +267,7 @@
 		theDB.transaction(insertInDateFingerprint, onTxError, onTxSuccess);
 		
 		navigator.notification.vibrate(500);
-		alert("Ingreso registrado.");
+		
 	}
 	
 	// Outcome registers?
@@ -237,7 +276,6 @@
 		theDB.transaction(insertOutDateFingerprint, onTxError, onTxSuccess);
 		
 		navigator.notification.vibrate(500);
-		alert("Salida registrada.");
 	}
 	
 	function showRecords(){
